@@ -1,0 +1,9 @@
+node_modules
+.DS_Store
+
+private/secrets.js
+public/*.html
+public/*.js
+public/*.js.map
+public/*.css
+
