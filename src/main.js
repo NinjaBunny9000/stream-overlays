@@ -47,15 +47,12 @@ client.on('message', (channel, tags, message, self) => {
      */ 
 
     const commandDefinitions = {
-        'tags': getTags,
-        'help': helpCommand,
         'color': color,
     };
 
     if(commandDefinitions[ctx.command]) {
         commandDefinitions[ctx.command](ctx);
     } else {
-        client.say(ctx.channel, 'that\'s not a command');
     }
 
 });
@@ -71,10 +68,7 @@ function helpCommand(ctx) {
 }
 
 function color(ctx) {
-    if(ctx.args.length == 0) {
-        client.say(ctx.channel, 'Provide a color as an argument');
-    } else if (ctx.args.length > 1) {
-        client.say(ctx.channel, 'Provide only one color as an argument');
+    if (ctx.args.length == 0 || ctx.args.length > 1) {
     } else {
         let color = ctx.args[0];
         if(color == 'random') {
@@ -83,6 +77,10 @@ function color(ctx) {
         }
         changeBorderColor(color);
     }
+}
+
+function getRandomColor() {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
 
 const w = window,
