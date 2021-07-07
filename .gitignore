@@ -5,5 +5,3 @@ node_modules
 public/*.html
 public/*.js
 public/*.js.map
-public/*.css
-
