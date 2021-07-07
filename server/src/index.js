@@ -2,33 +2,23 @@ import { terminal as term } from 'terminal-kit';
 import { logger as log, logDemo } from './loggyboi';
 import * as helpers from './helpers';
 import { v3 as hue } from 'node-hue-api';
-// import colormap from './colormap';
 import colors from './colors';
 import { HueFacade } from './hue';
 import * as tmi from 'tmi.js';
 import * as fs from 'fs';
 import secrets from './secrets';
 
-
-
-const deskLight = 55;
-const rearLeft = 54;
-const rearRight = 56;
-const studioLights = [ deskLight, rearLeft, rearRight ];
-
+// TODO: this is a mess
 log.silly('BOOTING UP!');
 
-// huetools.listLights(secrets.hue.ip, secrets.hue.user);
-const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, studioLights);
-
-
 // lights in the studio
-/**
- * STUDIO LIGHTS
- * 54 - Office - Bun; Door
- * 55 - Office - Bun; Desk
- * 56 - Office - Bun; Closet
-*/
+const deskLight = 55; // 55 - Office - Bun; Desk
+const rearLeft = 54;  // 54 - Office - Bun; Door
+const rearRight = 56;  // 56 - Office - Bun; Closet
+const studioLights = [ deskLight, rearLeft, rearRight ];
+
+// create a poorly-performing facade
+const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, studioLights);
 
 // connectyboi
 const client = new tmi.Client({
@@ -48,7 +38,6 @@ client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 
 // listen for !commands
 client.on('message', (channel, tags, message, self) => {
-    log.info(message);
 	if(self || !message.startsWith('!')) return;  // ignore self and non-commands
 
     // adds the stuff we need into a ctx object
@@ -82,7 +71,6 @@ client.on('message', (channel, tags, message, self) => {
     }
 
 });
-
 
 function getTags(ctx) {
     log.info(Object.keys(ctx.tags));
@@ -133,44 +121,3 @@ function color(ctx) {
 
 // TODO make this default to a scene
 // facade.changeColors(helpers.RGBtoXY(255, 0, 255) , 255);  // default to a color on start
-
-
-////////////////////// DEMO STUFF //////////////////////
-
-// logDemo();
-
-/** terminal-kit demo
- // term.grabInput( { mouse: 'button' } ) ;
-term.on( 'key' , function( key , matches , data ) {
-
-    switch ( key )
-    {
-        case 'UP' : term.up( 1 ) ; break ;
-        case 'DOWN' : term.down( 1 ) ; break ;
-        case 'LEFT' : term.left( 1 ) ; break ;
-        case 'RIGHT' : term.right( 1 ) ; break ;
-        case 'CTRL_C' : process.exit() ; break ;
-        default:
-            // Echo anything else
-            term.noFormat(
-                Buffer.isBuffer( data.code ) ?
-                    data.code :
-                    String.fromCharCode( data.code )
-            ) ;
-            break ;
-    }
-} ) ;
-
-term.on( 'mouse' , function( name , data ) {
-    term.moveTo( data.x , data.y ) ;
-} ) ;
-*/
-
-// export default function hello(user = '    World') {
-//   const u = user.trimStart().trimEnd();
-//   return `Hello ${u}!\n`;
-// }
-
-// if (require.main === module) {
-//   process.stdout.write(hello());
-// }
