@@ -1,10 +1,8 @@
 import { v3 as hue } from 'node-hue-api';
 import { logger as log, logDemo } from './loggyboi';
 
-
 async function discoverBridgeIP(timeout) {
     const discoveryResults = await hue.discovery.upnpSearch(timeout);
-  
     if (discoveryResults.length === 0) {
       log.warn('Failed to resolve any Hue Bridges');
       return null;
@@ -13,8 +11,7 @@ async function discoverBridgeIP(timeout) {
       return discoveryResults[0].ipaddress;
     }
 }
-  
-  
+
 async function discoverAndCreateUser(appName, deviceName, timoutMS=10000) {
     const ipAddress = discoverBridgeIP(timout)
     log.info('ipaddress of bridge', ipAddress);
@@ -67,5 +64,47 @@ function listLights(ip, user) {
 }
 
 
+// make a class called HueInterface
+class HueFacade {
+    constructor(ip, user, lights) {
+        this.ip = ip;
+        this.user = user;
+        this.lights = lights;
+    }
 
-export { discoverBridgeIP, discoverAndCreateUser, listLights };
+    async getAPI() {
+        return await hue.api.createLocal(this.ip).connect(this.user);
+    }
+
+    async changeColors(color, brightness) {
+        const api = await this.getAPI();
+        this.lights.forEach(async light => {
+            const result = await api.lights.setLightState(light, { on: true, brightness: brightness, xy: color });
+            log.debug(`Was state change successful? ${ result }`);
+        });
+    }
+
+    async setLightState(state) {
+        const api = await this.getAPI();
+        this.lights.forEach(async light => {
+            const result = await api.lights.setLightState(light, {on: state})
+            log.debug(`Was light ${light} changed successfully to ${state}? ${result}`);
+        });
+    }
+
+    async getLightDetails(lightId) {
+        const api = await this.getAPI();
+        const result = await api.lights.getLight(lightId);
+        log.debug(result.toStringDetailed());
+    }
+
+    async getLightState(lightId) {
+        const api = await this.getAPI();
+        const result = await api.lights.getLightState(lightId);
+        log.debug(JSON.stringify(result, null, 2));
+    }
+    
+
+}
+
+export { HueFacade, discoverBridgeIP, discoverAndCreateUser, listLights };

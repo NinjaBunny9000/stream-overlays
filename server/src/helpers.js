@@ -52,8 +52,14 @@ function hexToRGB(h) {
     return [parseInt(r), parseInt(g), parseInt(b)];
   }
 
+function getRandomColor() {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+
 export {
     EnhanceColor,
     RGBtoXY,
-    hexToRGB
+    hexToRGB,
+    getRandomColor
 };

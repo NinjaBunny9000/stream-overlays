@@ -57,7 +57,6 @@ client.on('message', (channel, tags, message, self) => {
 
 });
 
-
 function getTags(ctx) {
     console.log(Object.keys(ctx.tags));
     client.say(ctx.channel, `${Object.keys(ctx.tags)}`);
@@ -68,7 +67,9 @@ function helpCommand(ctx) {
 }
 
 function color(ctx) {
-    if (ctx.args.length == 0 || ctx.args.length > 1) {
+    // check if a string is in the form of an rgba color
+
+    if ((ctx.args.length == 0 || ctx.args.length > 1) && !'/^rgba\(/)'.test(ctx.args)) {
     } else {
         let color = ctx.args[0];
         if(color == 'random') {
@@ -87,8 +88,6 @@ const w = window,
       d = document,
       e = d.documentElement,
       g = d.getElementsByTagName('body')[0],
-    //   x = window.outerWidth,
-    //   y = window.outerHeight;
       x = w.innerWidth || e.clientWidth || g.clientWidth,
       y = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
@@ -101,33 +100,7 @@ const border = wrapper.append('div')
     .attr('class', 'border');
 
 function changeBorderColor(color) {
-
-    const colorMap = {
-        'black': '#000000',
-        'white': '#FFFFFF',
-        'red': '#FF0000',
-        'green': '#00FF00',
-        'blue': '#0000FF',
-        'yellow': '#FFFF00',
-        'cyan': '#00FFFF',
-        'magenta': '#FF00FF',
-        'gray': '#808080',
-        'lightgray': '#C0C0C0',
-        'darkgray': '#A0A0A0',
-        'lightred': '#FFB0B0',
-        'lightgreen': '#B0FFB0',
-        'lightblue': '#B0BFFF',
-        'lightyellow': '#FFFFB0',
-        'lightcyan': '#B0FFFF',
-        'lightmagenta': '#FFB0FF',
-        'transparent': 'transparent',
-    }
-
-    if(colorMap[color]) {
-        border.style('outline-color', colorMap[color]);
-    } else {
-        border.style('outline-color', color);
-    }
+    setTimeout(() => {  border.style('color', color); }, 250);
 }
 
 ////////////// HELPER FUNCTIONS //////////////
