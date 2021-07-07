@@ -36,6 +36,12 @@ const client = new tmi.Client({
 
 client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 
+const commandDefinitions = {
+    'tags': getTags,
+    'help': helpCommand,
+    'color': color,
+};
+
 // listen for !commands
 client.on('message', (channel, tags, message, self) => {
 	if(self || !message.startsWith('!')) return;  // ignore self and non-commands
@@ -51,18 +57,12 @@ client.on('message', (channel, tags, message, self) => {
     ctx.command = ctx.args.shift().toLowerCase();
     ctx.message = ctx.args.join(' ');
 
-    /** TAGS
+    /** TAGS REFERENCE:
      * badge-info, badges, client-nonce, color, display-name, emotes, 
      * flags, id, mod, room-id, subscriber, tmi-sent-ts, turbo, 
      * user-id, user-type, emotes-raw, badge-info-raw, badges-raw, 
      * username, message-type
      */
-
-    const commandDefinitions = {
-        'tags': getTags,
-        'help': helpCommand,
-        'color': color,
-    };
 
     if(commandDefinitions[ctx.command]) {
         commandDefinitions[ctx.command](ctx);
@@ -72,16 +72,13 @@ client.on('message', (channel, tags, message, self) => {
 
 });
 
-function getTags(ctx) {
-    log.info(Object.keys(ctx.tags));
-    client.say(ctx.channel, `${Object.keys(ctx.tags)}`);
-}
-
 function helpCommand(ctx) {
-    // TODO fill this in lmao
+    // list commands to the channel
+    const commands = Object.keys(commandDefinitions);
+    const commandList = commands.map(c => `!${c}`);
+    client.say(ctx.channel, `@${ctx.author}, Here are the commands: ${commandList.join(', ')}`);
 }
 
-// TODO: this is a mess
 function color(ctx) {
     const helperText = `@${ctx.author}, please provide a color as an argument (using a name, hexcode, or rgb(r,g,b))`
     const rgbRegex = /^rgb\(\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*\)$/
@@ -92,7 +89,6 @@ function color(ctx) {
 
     if (colorRequested.match(/^#[0-9a-f]{6}$/i) || colorRequested.match(/^#[0-9a-f]{3}$/i)) {
         // it's a hex value
-        // TODO: make sure the light's turned on
         let colorRGB = helpers.hexToRGB(ctx.args[0]);
         let colorXy = helpers.RGBtoXY(colorRGB[0], colorRGB[1], colorRGB[2]);
         facade.changeColors(colorXy, 255);
@@ -117,7 +113,6 @@ function color(ctx) {
         client.say(ctx.channel, helperText);
     }
 }
-
 
 // TODO make this default to a scene
 // facade.changeColors(helpers.RGBtoXY(255, 0, 255) , 255);  // default to a color on start
