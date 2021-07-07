@@ -1,0 +1,98 @@
+{
+  "name": "stream-server",
+  "version": "1.0.0",
+  "description": "Node.js ES6+ starter with Babel & ESLint",
+  "main": "lib/index.js",
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "6.1.0"
+          },
+          "corejs": "3",
+          "useBuiltIns": "usage"
+        }
+      ]
+    ],
+    "plugins": [
+      [
+        "@babel/plugin-proposal-object-rest-spread",
+        {
+          "useBuiltIns": true
+        }
+      ]
+    ],
+    "env": {
+      "test": {
+        "plugins": [
+          "istanbul"
+        ],
+        "presets": [
+          [
+            "@babel/preset-env"
+          ]
+        ]
+      }
+    }
+  },
+  "nyc": {
+    "require": [
+      "@babel/register"
+    ],
+    "sourceMap": false,
+    "instrument": false
+  },
+  "eslintConfig": {
+    "extends": "airbnb/base",
+    "env": {
+      "node": true,
+      "mocha": true
+    }
+  },
+  "scripts": {
+    "lint": "eslint src/**",
+    "build": "babel src -d lib",
+    "prepublish": "npm run build",
+    "start": "node lib/",
+    "dev": "babel-node src/",
+    "test": "NODE_ENV=test nyc mocha",
+    "test-cov": "NODE_ENV=test nyc --check-coverage --lines 60 mocha && nyc report --reporter=lcov"
+  },
+  "engines": {
+    "node": ">=6.1.0",
+    "npm": ">=3.8.6"
+  },
+  "repository": {},
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "author": "Krissy Heishman",
+  "license": "None",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.6",
+    "@babel/node": "^7.8.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+    "@babel/preset-env": "^7.8.6",
+    "@babel/register": "^7.8.6",
+    "babel-plugin-istanbul": "^5.2.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.20.1",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1"
+  },
+  "dependencies": {
+    "core-js": "^3.6.4",
+    "node-hue-api": "^5.0.0-beta.2",
+    "terminal-kit": "^2.1.5",
+    "tmi.js": "^1.8.3",
+    "twitch": "^4.6.0",
+    "twitch-pubsub-client": "^4.6.0",
+    "winston": "^3.3.3",
+    "winston-console-format": "^1.0.8"
+  }
+}
