@@ -11,6 +11,30 @@ import secrets from './secrets';
 // TODO: this is a mess
 log.silly('BOOTING UP!');
 
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http, {
+    cors: {
+    origin: '*',
+    }
+});
+const port = process.env.PORT || 3000;
+  
+app.get('/', (req, res) => {
+res.sendFile(__dirname + '/index.html');
+});
+
+io.on('connection', (socket) => {
+socket.on('message', msg => {
+    io.emit('message', msg);
+    log.silly(`msg rcvd: ${msg}`);
+});
+});
+
+http.listen(port, () => {
+    console.log(`Socket.IO server running at http://localhost:${port}/`);
+});
+
 // lights in the studio
 const deskLight = 55; // 55 - Office - Bun; Desk
 const rearLeft = 54;  // 54 - Office - Bun; Door
@@ -39,7 +63,8 @@ client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 const commandDefinitions = {
     'help': helpCommand,
     'color': color,
-    'idea': idea
+    'idea': idea,
+    'project': project
 };
 
 // listen for !commands
@@ -130,6 +155,28 @@ function idea(ctx) {
         ideas[ctx.author] = [idea];
     }
     fs.writeFileSync('src/data/ideas.json', JSON.stringify(ideas));
-    log.info(`idea added: ${ctx.message}`);
+    log.info(`${ctx.author} added an idea: ${ctx.message}`);
     client.say(ctx.channel, `Thanks, @${ctx.author}. I added your idea to The List.`);
+}
+
+
+function project(ctx) {
+
+    const helperText = `@${ctx.author}, you're doin ir wrong!!`
+    if (ctx.args.length === 0) { client.say(ctx.channel, helperText); return; }
+
+    const proj = ctx.message;
+
+    // send the proj to the overlay via websocket
+    // const ws = new WebSocket(`ws://${secrets.overlay.host}:${secrets.overlay.port}/`);
+    
+    // emit the proj as a ws event using socket.io and socket object
+    socket.emit('project', proj);
+
+    socket.on('project', function(msg) {
+        log.silly('it happend');
+        log.silly(msg);
+    });
+
+    client.say(ctx.channel, `@${ctx.author}, sent the project to the overlay!`);
 }

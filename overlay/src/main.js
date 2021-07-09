@@ -2,6 +2,17 @@ console.log('LOADED');
 import secrets from '../private/secrets';
 import * as d3 from 'd3';
 import * as tmi from 'tmi.js';
+const io = require('socket.io-client');
+
+const sock = io('http://localhost:3000');
+
+sock.emit('message', 'SOCKETIO TEST PASSED');
+
+sock.on('message', function(msg) {
+    console.log(msg);
+});
+
+
 
 addCss('style.css');
 
@@ -122,3 +133,5 @@ function addSrc(fileName) {
     script.setAttribute("crossorigin", 'anonymous');
     head.appendChild(script);
 }
+
+sock.emit('message', 'PAGE LOADED END OF FILE');

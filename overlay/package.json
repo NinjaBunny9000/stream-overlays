@@ -37,6 +37,8 @@
     "local-package": "file:../modules/local-package",
     "mdb-ui-kit": "^3.8.0",
     "node-hue-api": "^5.0.0-beta.2",
+    "socket.io": "^4.1.2",
+    "socket.io-client": "^4.1.2",
     "style-loader": "^0.23.1",
     "tmi.js": "^1.8.3",
     "twitch": "^4.6.0",
