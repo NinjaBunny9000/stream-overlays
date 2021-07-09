@@ -5,3 +5,8 @@ node_modules
 public/*.html
 public/*.js
 public/*.js.map
+
+
+**/bundle.js
+**/bundle.js.map
+**/public/index.html
