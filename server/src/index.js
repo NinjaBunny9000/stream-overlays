@@ -39,6 +39,7 @@ client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 const commandDefinitions = {
     'help': helpCommand,
     'color': color,
+    'idea': idea
 };
 
 // listen for !commands
@@ -113,5 +114,22 @@ function color(ctx) {
     }
 }
 
-// TODO make this default to a scene
-// facade.changeColors(helpers.RGBtoXY(255, 0, 255) , 255);  // default to a color on start
+
+function idea(ctx) {
+    const helperText = `@${ctx.author}, do you have an idea? Well use !idea followed by your idea to save for later!`
+    if (ctx.args.length === 0) { client.say(ctx.channel, helperText); return; }
+    
+    // add the idea to a json file
+    const now = new Date();
+    const dateTime = now.toISOString();
+    const idea = { [dateTime]: `@${ctx.author}: ${ctx.message}` };
+    const ideas = JSON.parse(fs.readFileSync('src/data/ideas.json', 'utf8'));
+    if (ideas.hasOwnProperty(ctx.author)) {
+        ideas[ctx.author].push(idea);
+    } else {
+        ideas[ctx.author] = [idea];
+    }
+    fs.writeFileSync('src/data/ideas.json', JSON.stringify(ideas));
+    log.info(`idea added: ${ctx.message}`);
+    client.say(ctx.channel, `Thanks, @${ctx.author}. I added your idea to The List.`);
+}
