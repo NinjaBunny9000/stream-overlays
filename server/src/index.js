@@ -37,7 +37,6 @@ const client = new tmi.Client({
 client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 
 const commandDefinitions = {
-    'tags': getTags,
     'help': helpCommand,
     'color': color,
 };
