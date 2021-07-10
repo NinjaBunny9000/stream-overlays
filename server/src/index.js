@@ -1,7 +1,6 @@
 import { terminal as term } from 'terminal-kit';
 import { logger as log, logDemo } from './loggyboi';
 import * as helpers from './helpers';
-import { v3 as hue } from 'node-hue-api';
 import colors from './colors';
 import { HueFacade } from './hue';
 import { OverlayCommander } from './overlay';
@@ -11,6 +10,24 @@ import secrets from './secrets';
 
 // TODO: this is a mess
 log.silly('BOOTING UP!');
+
+/** TODO /!\ This is a big one.
+ * 
+ *  -- BABIES --
+ *  - make a quick command for ide or setup or something or whatever and whatnot
+ *  - font commands that can utilize aliases
+ *  - apply permissions to some of the commands and subcommands
+ *  - overlay feature: rotating banner thing???????? for infos and such
+ *  - !scene or !scene:name to change the scene
+ *  - !scene:next to change to the next scene
+ *  - !scene:previous to change to the previous scene
+ *  - !scene:random to change to a random scene
+ *  - !scene:list to list all the scenes
+ * 
+ *  -- ALSO -- 
+ *  - should probably document how to get this thang stood up on your own comp00terz
+ *  - change color for follows and redemptions and subs and all that??
+ */
 
 const app = require('express')();
 const http = require('http').Server(app);
@@ -78,7 +95,7 @@ const commandDefinitions = {
     'idea': idea,
     'project': project,
     'drone': drone,
-    'font': font
+    'font': font,
 };
 
 // listen for !commands
