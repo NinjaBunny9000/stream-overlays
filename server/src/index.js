@@ -63,6 +63,10 @@ const client = new tmi.Client({
 
 client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 
+const botState = {
+    colorLock: false,
+}
+
 const commandDefinitions = {
     'help': helpCommand,
     'color': color,
@@ -108,13 +112,26 @@ function helpCommand(ctx) {
 }
 
 function color(ctx) {
+    
+    // helper text stuff
     const helperText = `@${ctx.author}, please provide a color as an argument (using a name, hexcode, or rgb(r,g,b))`
-    const rgbRegex = /^rgb\(\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*\)$/
-
     if (ctx.args.length === 0) { client.say(ctx.channel, helperText); return; }  // handle no args
-
+    
+    // handle color-lock to chill out color changes for a bit
+    // TODO make this a mod-only thing (cuz right now any user can do it)
+    if (ctx.args[0] === 'lock') {
+        botState.colorLock = !botState.colorLock;
+        client.say(ctx.channel, `@${ctx.author}, colors are now ${botState.colorLock ? 'LOCKED.' : 'UNLOCKED.'}`);
+        return;
+    } else if (botState.colorLock) {
+        // skip the color function if botstate.colorLock is true
+        client.say(ctx.channel, `@${ctx.author}, colors are locked for now.`);
+        return;
+    }
+    
     const colorRequested = ctx.args[0].toLowerCase();
-
+    const rgbRegex = /^rgb\(\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*\)$/
+    
     if (colorRequested.match(/^#[0-9a-f]{6}$/i) || colorRequested.match(/^#[0-9a-f]{3}$/i)) {
         // it's a hex value
         let colorRGB = helpers.hexToRGB(ctx.args[0]);
