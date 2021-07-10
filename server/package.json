@@ -53,6 +53,7 @@
   },
   "scripts": {
     "lint": "eslint src/**",
+    "setup": "babel-node setup/",
     "build": "babel src -d lib",
     "prepublish": "npm run build",
     "start": "node lib/",

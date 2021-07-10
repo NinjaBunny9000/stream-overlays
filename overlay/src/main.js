@@ -1,7 +1,5 @@
 console.log('LOADED');
-import secrets from '../private/secrets';
 import * as d3 from 'd3';
-import * as tmi from 'tmi.js';
 const io = require('socket.io-client');
 
 const sock = io('http://192.168.36.131:3000');

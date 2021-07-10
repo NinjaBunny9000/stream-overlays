@@ -6,7 +6,8 @@ import { HueFacade } from './hue';
 import { OverlayCommander } from './overlay';
 import * as tmi from 'tmi.js';
 import * as fs from 'fs';
-import secrets from './secrets';
+import secrets from '../secrets';
+import { default as cfg } from '../config';
 
 // TODO: this is a mess
 log.silly('BOOTING UP!');
@@ -65,7 +66,7 @@ const rearRight = 56;  // 56 - Office - Bun; Closet
 const studioLights = [ deskLight, rearLeft, rearRight ];
 
 // create a poorly-performing facade
-const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, studioLights);
+const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, );
 
 
 // connectyboi
@@ -76,10 +77,10 @@ const client = new tmi.Client({
 		secure: true
 	},
 	identity: {
-		username: secrets.twitch.botName,
+		username: cfg.twitch.botuser,
 		password: secrets.twitch.authyboi
 	},
-	channels: [ secrets.twitch.channel ]
+	channels: [ cfg.twitch.channel ]
 });
 
 client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
