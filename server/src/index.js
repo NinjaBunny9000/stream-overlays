@@ -31,8 +31,11 @@ socket.on('message', msg => {
 });
 });
 
-http.listen(port, () => {
-    console.log(`Socket.IO server running at http://localhost:${port}/`);
+http.listen({
+    port: port,
+    host: '0.0.0.0'
+}, () => {
+    console.log(`Socket.IO server running at http://0.0.0.0:${port}/`);
 });
 
 // lights in the studio
