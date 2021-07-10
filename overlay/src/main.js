@@ -6,67 +6,13 @@ const io = require('socket.io-client');
 
 const sock = io('http://192.168.36.131:3000');
 
-sock.emit('message', 'SOCKETIO TEST PASSED');
+// debug stuff (delet)
 
 sock.on('message', function(msg) {
     console.log(msg);
 });
 
-
-
 addCss('style.css');
-
-// // connectyboi
-// const client = new tmi.Client({
-// 	options: { debug: true, messagesLogLevel: "debug" },
-// 	connection: {
-// 		reconnect: true,
-// 		secure: true
-// 	},
-// 	identity: {
-// 		username: secrets.botName,
-// 		password: secrets.authyboi
-// 	},
-// 	channels: [ secrets.channel ]
-// });
-
-// client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
-
-// client.on('join', (channel, tags, message, self) => {
-//     console.log(`${tags.username} Connected to ${channel}`);
-// });
-
-// listen for !commands
-// client.on('message', (channel, tags, message, self) => {
-//     console.log(message);
-// 	if(self || !message.startsWith('!')) return;
-
-//     const ctx = {
-//         channel: channel,
-//         client: client,
-//         args: message.slice(1).split(' '),
-//         tags: tags
-//     }
-//     ctx.command = ctx.args.shift().toLowerCase();
-//     ctx.message = ctx.args.join(' ');
-
-//     /** TAGS
-//      * badge-info, badges, client-nonce, color, display-name, emotes, 
-//      * flags, id, mod, room-id, subscriber, tmi-sent-ts, turbo, 
-//      * user-id, user-type, emotes-raw, badge-info-raw, badges-raw, 
-//      * username, message-type
-//      */ 
-
-//     const commandDefinitions = {
-//         'color': color,
-//     };
-
-//     if(commandDefinitions[ctx.command]) {
-//         commandDefinitions[ctx.command](ctx);
-//     } else {
-//     }
-
-// });
 
 function getTags(ctx) {
     console.log(Object.keys(ctx.tags));
@@ -136,7 +82,36 @@ function addSrc(fileName) {
 
 sock.emit('message', 'PAGE LOADED END OF FILE');
 
+function updateProjectText(text) {
+    d3.select('#project-text').remove();
+    wrapper.append('div')
+        .attr('id', 'project-text')
+        .style('position', 'absolute')
+        .text(text);
+}
+
 
 sock.on('color-change', (color) => {
     changeBorderColor(color);
 });
+
+
+sock.on('project-update', (proj) => {
+    console.log(`recieving project: ${proj}`)
+    updateProjectText(proj);
+});
+
+sock.on('overlay-reset', (msg) => {
+    console.log(`resetting overlay`)
+    updateProjectText(msg.proj);
+    changeBorderColor(msg.border)
+});
+
+// sock.on('connection', (msg) => {
+//     console.log(`connected to ${msg}`);
+//     sock.emit('request-reset', {});
+// });
+
+
+sock.emit('request-reset', this);
+// TODO on connect, request the current color of the border from the server

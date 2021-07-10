@@ -71,11 +71,14 @@ const botState = {
     colorLock: false,
 }
 
+
 const commandDefinitions = {
     'help': helpCommand,
     'color': color,
     'idea': idea,
-    'project': project
+    'project': project,
+    'drone': drone,
+    'font': font
 };
 
 // listen for !commands
@@ -174,7 +177,7 @@ function idea(ctx) {
     // add the idea to a json file
     const now = new Date();
     const dateTime = now.toISOString();
-    const idea = { [dateTime]: `@${ctx.author}: ${ctx.message}` };
+    const idea = { [dateTime]: ctx.message };
     const ideas = JSON.parse(fs.readFileSync('src/data/ideas.json', 'utf8'));
     if (ideas.hasOwnProperty(ctx.author)) {
         ideas[ctx.author].push(idea);
@@ -188,22 +191,44 @@ function idea(ctx) {
 
 
 function project(ctx) {
+    if (!checkPerms(ctx)) { return; }
 
     const helperText = `@${ctx.author}, you're doin ir wrong!!`
     if (ctx.args.length === 0) { client.say(ctx.channel, helperText); return; }
 
     const proj = ctx.message;
-
-    // send the proj to the overlay via websocket
-    // const ws = new WebSocket(`ws://${secrets.overlay.host}:${secrets.overlay.port}/`);
-    
-    // emit the proj as a ws event using socket.io and socket object
-    socket.emit('project', proj);
-
-    socket.on('project', function(msg) {
-        log.silly('it happend');
-        log.silly(msg);
-    });
-
+    overlay.updateProject(proj);
     client.say(ctx.channel, `@${ctx.author}, sent the project to the overlay!`);
+}
+
+
+function drone(ctx) {
+    // if arg length is 0, send help message
+    if (ctx.args.length === 0) {
+        client.say(ctx.channel, 'gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned ');
+        return;
+    } else if (ctx.args.length === 1){
+        const dronee = ctx.args[0];
+        // check if starts with @, otherwise add it
+        client.say(ctx.channel, `Hey, ${dronee}, GIT DRONED!!!... gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned gitDroned `);
+    } else {
+        // help text
+        const helperText = `@${ctx.author}, you're doin ir wrong!! Format: !drone <user> || !drone`
+        client.say(ctx.channel, helperText);
+    }
+}
+
+function checkPerms(ctx) {
+    if (ctx.tags.mod || ctx.tags['room-id'] === ctx.tags['user-id']) {
+        return true;
+    } else {
+        log.debug('someone wasn\'t a mod');
+        log.debug(`room-id: ${ctx.tags['room-id']}, user-id: ${ctx.tags['user-id']}`);
+        client.say(ctx.channel, `@${ctx.author}, you don't have permission to use this command.`);
+        return false;
+    }
+}
+
+function font(ctx) {
+    client.say(ctx.channel, `@${ctx.author}, Bun's using JetbrainsMono (Nerd Font) w/Ligatures`);
 }
