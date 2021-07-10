@@ -4,6 +4,7 @@ import * as helpers from './helpers';
 import { v3 as hue } from 'node-hue-api';
 import colors from './colors';
 import { HueFacade } from './hue';
+import { OverlayCommander } from './overlay';
 import * as tmi from 'tmi.js';
 import * as fs from 'fs';
 import secrets from './secrets';
@@ -25,11 +26,13 @@ res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
-socket.on('message', msg => {
-    io.emit('message', msg);
-    log.silly(`msg rcvd: ${msg}`);
+    socket.on('message', msg => {
+        io.emit('message', msg);
+        log.silly(`msg rcvd: ${msg}`);
+    });
 });
-});
+const overlay = new OverlayCommander(io);
+// overlay.connect()
 
 http.listen({
     port: port,
@@ -46,6 +49,7 @@ const studioLights = [ deskLight, rearLeft, rearRight ];
 
 // create a poorly-performing facade
 const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, studioLights);
+
 
 // connectyboi
 const client = new tmi.Client({
@@ -99,7 +103,7 @@ client.on('message', (channel, tags, message, self) => {
     if(commandDefinitions[ctx.command]) {
         commandDefinitions[ctx.command](ctx);
     } else {
-        client.say(ctx.channel, 'that\'s not a command');
+        // client.say(ctx.channel, 'that\'s not a command');
     }
 
 });
@@ -119,7 +123,7 @@ function color(ctx) {
     
     // handle color-lock to chill out color changes for a bit
     // TODO make this a mod-only thing (cuz right now any user can do it)
-    if (ctx.args[0] === 'lock') {
+    if (ctx.args[0].toLowerCase() === 'lock') {
         botState.colorLock = !botState.colorLock;
         client.say(ctx.channel, `@${ctx.author}, colors are now ${botState.colorLock ? 'LOCKED.' : 'UNLOCKED.'}`);
         return;
@@ -134,25 +138,28 @@ function color(ctx) {
     
     if (colorRequested.match(/^#[0-9a-f]{6}$/i) || colorRequested.match(/^#[0-9a-f]{3}$/i)) {
         // it's a hex value
-        let colorRGB = helpers.hexToRGB(ctx.args[0]);
-        let colorXy = helpers.RGBtoXY(colorRGB[0], colorRGB[1], colorRGB[2]);
+        let colorRGB = helpers.hexToRGB(colorRequested);
+        let colorXy = helpers.RGBtoXY(...colorRGB);
         facade.changeColors(colorXy, 255);
+        overlay.changeBorderColor(colorRGB);
     } else if (colorRequested.match(rgbRegex)) {
         // it's an rgb value
         let colorRGB = colorRequested.split('(')[1].split(')')[0].split(',');
-        log.silly(colorRGB);
-        facade.changeColors(helpers.RGBtoXY(colorRGB[0], colorRGB[1], colorRGB[2]), 255);
+        facade.changeColors(helpers.RGBtoXY(...colorRGB), 255);
+        overlay.changeBorderColor(colorRGB);
     } else if (colorRequested === 'random') {
         let randomColor = helpers.hexToRGB(helpers.getRandomColor());
         log.info(`changing the lights to a random color: ${randomColor}`)
-        facade.changeColors(helpers.RGBtoXY(randomColor[0], randomColor[1], randomColor[2]) , 255);
+        facade.changeColors(helpers.RGBtoXY(...randomColor) , 255);
+        overlay.changeBorderColor(randomColor);
         return;
     } else if (colors[colorRequested]) {
         // it's a named color
         if (colorRequested === 'black') { facade.setLightState(false); return;}  // handle black
         let colorRGB = helpers.hexToRGB(colors[colorRequested]);
-        let colorXy = helpers.RGBtoXY(colorRGB[0], colorRGB[1], colorRGB[2]);
+        let colorXy = helpers.RGBtoXY(...colorRGB);
         facade.changeColors(colorXy, 255);
+        overlay.changeBorderColor(colorRGB);
     } else {
         // something was wrong with the command
         client.say(ctx.channel, helperText);

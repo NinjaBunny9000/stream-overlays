@@ -16,57 +16,57 @@ sock.on('message', function(msg) {
 
 addCss('style.css');
 
-// connectyboi
-const client = new tmi.Client({
-	options: { debug: true, messagesLogLevel: "debug" },
-	connection: {
-		reconnect: true,
-		secure: true
-	},
-	identity: {
-		username: secrets.botName,
-		password: secrets.authyboi
-	},
-	channels: [ secrets.channel ]
-});
+// // connectyboi
+// const client = new tmi.Client({
+// 	options: { debug: true, messagesLogLevel: "debug" },
+// 	connection: {
+// 		reconnect: true,
+// 		secure: true
+// 	},
+// 	identity: {
+// 		username: secrets.botName,
+// 		password: secrets.authyboi
+// 	},
+// 	channels: [ secrets.channel ]
+// });
 
-client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
+// client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 
-client.on('join', (channel, tags, message, self) => {
-    console.log(`${tags.username} Connected to ${channel}`);
-});
+// client.on('join', (channel, tags, message, self) => {
+//     console.log(`${tags.username} Connected to ${channel}`);
+// });
 
 // listen for !commands
-client.on('message', (channel, tags, message, self) => {
-    console.log(message);
-	if(self || !message.startsWith('!')) return;
+// client.on('message', (channel, tags, message, self) => {
+//     console.log(message);
+// 	if(self || !message.startsWith('!')) return;
 
-    const ctx = {
-        channel: channel,
-        client: client,
-        args: message.slice(1).split(' '),
-        tags: tags
-    }
-    ctx.command = ctx.args.shift().toLowerCase();
-    ctx.message = ctx.args.join(' ');
+//     const ctx = {
+//         channel: channel,
+//         client: client,
+//         args: message.slice(1).split(' '),
+//         tags: tags
+//     }
+//     ctx.command = ctx.args.shift().toLowerCase();
+//     ctx.message = ctx.args.join(' ');
 
-    /** TAGS
-     * badge-info, badges, client-nonce, color, display-name, emotes, 
-     * flags, id, mod, room-id, subscriber, tmi-sent-ts, turbo, 
-     * user-id, user-type, emotes-raw, badge-info-raw, badges-raw, 
-     * username, message-type
-     */ 
+//     /** TAGS
+//      * badge-info, badges, client-nonce, color, display-name, emotes, 
+//      * flags, id, mod, room-id, subscriber, tmi-sent-ts, turbo, 
+//      * user-id, user-type, emotes-raw, badge-info-raw, badges-raw, 
+//      * username, message-type
+//      */ 
 
-    const commandDefinitions = {
-        'color': color,
-    };
+//     const commandDefinitions = {
+//         'color': color,
+//     };
 
-    if(commandDefinitions[ctx.command]) {
-        commandDefinitions[ctx.command](ctx);
-    } else {
-    }
+//     if(commandDefinitions[ctx.command]) {
+//         commandDefinitions[ctx.command](ctx);
+//     } else {
+//     }
 
-});
+// });
 
 function getTags(ctx) {
     console.log(Object.keys(ctx.tags));
@@ -111,7 +111,7 @@ const border = wrapper.append('div')
     .attr('class', 'border');
 
 function changeBorderColor(color) {
-    setTimeout(() => {  border.style('color', color); }, 250);
+    setTimeout(() => { border.style('color', `rgb(${color.join(',')})`); }, 500);
 }
 
 ////////////// HELPER FUNCTIONS //////////////
@@ -135,3 +135,8 @@ function addSrc(fileName) {
 }
 
 sock.emit('message', 'PAGE LOADED END OF FILE');
+
+
+sock.on('color-change', (color) => {
+    changeBorderColor(color);
+});
