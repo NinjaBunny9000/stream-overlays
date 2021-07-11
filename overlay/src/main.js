@@ -1,43 +1,14 @@
-console.log('LOADED');
 import * as d3 from 'd3';
 const io = require('socket.io-client');
-
-const sock = io('http://192.168.36.131:3000');
-
-// debug stuff (delet)
-
-sock.on('message', function(msg) {
-    console.log(msg);
-});
-
 addCss('style.css');
 
-function getTags(ctx) {
-    console.log(Object.keys(ctx.tags));
-    client.say(ctx.channel, `${Object.keys(ctx.tags)}`);
-}
+// cfg
+const sock = io('http://192.168.36.131:3000');  // add 0.0.0.0 if hosting on localhost else the ip of the server
 
-function helpCommand(ctx) {
-    // TODO fill this in lmao
-}
 
-function color(ctx) {
-    // check if a string is in the form of an rgba color
-
-    if ((ctx.args.length == 0 || ctx.args.length > 1) && !'/^rgba\(/)'.test(ctx.args)) {
-    } else {
-        let color = ctx.args[0];
-        if(color == 'random') {
-            changeBorderColor(getRandomColor());
-            return;
-        }
-        changeBorderColor(color);
-    }
-}
-
-function getRandomColor() {
-    return '#' + Math.floor(Math.random() * 16777215).toString(16);
-}
+/*********************************************************************************/
+/****************************** build the wrapper ********************************/
+/*********************************************************************************/
 
 const w = window,
       d = document,
@@ -54,31 +25,12 @@ const wrapper = d3.select('body')
 const border = wrapper.append('div')
     .attr('class', 'border');
 
+
+// event functions
+
 function changeBorderColor(color) {
     setTimeout(() => { border.style('color', `rgb(${color.join(',')})`); }, 500);
 }
-
-////////////// HELPER FUNCTIONS //////////////
-
-// helper functions
-function addCss(fileName) {
-    let head = document.head;
-    let link = document.createElement("link");
-    link.type = "text/css";
-    link.rel = "stylesheet";
-    link.href = fileName;
-    head.appendChild(link);
-}
-
-function addSrc(fileName) {
-    let head = document.head;
-    let script = document.createElement("script");
-    script.setAttribute("src", fileName);
-    script.setAttribute("crossorigin", 'anonymous');
-    head.appendChild(script);
-}
-
-sock.emit('message', 'PAGE LOADED END OF FILE');
 
 function updateProjectText(text) {
     d3.select('#project-text').remove();
@@ -88,11 +40,13 @@ function updateProjectText(text) {
         .text(text);
 }
 
+/*********************************************************************************/
+/******************************* socket.io events ********************************/
+/*********************************************************************************/
 
 sock.on('color-change', (color) => {
     changeBorderColor(color);
 });
-
 
 sock.on('project-update', (proj) => {
     console.log(`recieving project: ${proj}`)
@@ -105,11 +59,17 @@ sock.on('overlay-reset', (msg) => {
     changeBorderColor(msg.border)
 });
 
-// sock.on('connection', (msg) => {
-//     console.log(`connected to ${msg}`);
-//     sock.emit('request-reset', {});
-// });
-
-
 sock.emit('request-reset', this);
-// TODO on connect, request the current color of the border from the server
+
+
+////////////// HELPER FUNCTIONS //////////////
+
+// helper functions
+function addCss(fileName) {
+    let head = document.head;
+    let link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = fileName;
+    head.appendChild(link);
+}
