@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 
 **/secrets.js
+**/config.js
 public/*.html
 public/*.js
 public/*.js.map
