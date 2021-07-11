@@ -1,0 +1,17 @@
+export default {
+    twitch: {
+        botuser: 'twitchbotusername',
+        channel: 'twitchchannelakabroadcaster'
+    },
+    hue: {
+        lights: {
+            lightName: 1,
+            callItWhatever: 2,
+            doesntMatter: 3,
+        },
+        groups: {
+            studio: [1, 2, 3],  // name: [lights id #'s from above]
+        }
+    }
+
+}
