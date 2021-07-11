@@ -12,23 +12,10 @@ import { default as cfg } from '../config';
 // TODO: this is a mess
 log.silly('BOOTING UP!');
 
-/** TODO /!\ This is a big one.
- * 
- *  -- BABIES --
- *  - make a quick command for ide or setup or something or whatever and whatnot
- *  - font commands that can utilize aliases
- *  - apply permissions to some of the commands and subcommands
- *  - overlay feature: rotating banner thing???????? for infos and such
- *  - !scene or !scene:name to change the scene
- *  - !scene:next to change to the next scene
- *  - !scene:previous to change to the previous scene
- *  - !scene:random to change to a random scene
- *  - !scene:list to list all the scenes
- * 
- *  -- ALSO -- 
- *  - should probably document how to get this thang stood up on your own comp00terz
- *  - change color for follows and redemptions and subs and all that??
- */
+
+/*********************************************************************************/
+/******************************* socket.io server ********************************/
+/*********************************************************************************/
 
 const app = require('express')();
 const http = require('http').Server(app);
@@ -49,8 +36,8 @@ io.on('connection', (socket) => {
         log.silly(`msg rcvd: ${msg}`);
     });
 });
-const overlay = new OverlayCommander(io);
-// overlay.connect()
+
+
 
 http.listen({
     port: port,
@@ -59,17 +46,32 @@ http.listen({
     console.log(`Socket.IO server running at http://0.0.0.0:${port}/`);
 });
 
-// lights in the studio
-const deskLight = 55; // 55 - Office - Bun; Desk
-const rearLeft = 54;  // 54 - Office - Bun; Door
-const rearRight = 56;  // 56 - Office - Bun; Closet
-const studioLights = [ deskLight, rearLeft, rearRight ];
+
 
 // create a poorly-performing facade
-const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, );
+const facade = new HueFacade(secrets.hue.ip, secrets.hue.user, cfg.hue.groups.studio);
+const overlay = new OverlayCommander(io);
 
 
-// connectyboi
+/*********************************************************************************/
+/***************************** twitch chat bot stuff *****************************/
+/*********************************************************************************/
+
+
+const commandDefinitions = {
+    'help': helpCommand,
+    'color': color,
+    'idea': idea,
+    'project': project,
+    'drone': drone,
+    'font': font,
+};
+
+const botState = {
+    colorLock: false,
+};
+
+// connectyboi connects to the twitch chat
 const client = new tmi.Client({
 	options: { debug: true, messagesLogLevel: "debug" },
 	connection: {
@@ -82,22 +84,8 @@ const client = new tmi.Client({
 	},
 	channels: [ cfg.twitch.channel ]
 });
-
 client.connect();  // DON'T ACCIDENTALLY REMOVE THIS
 
-const botState = {
-    colorLock: false,
-}
-
-
-const commandDefinitions = {
-    'help': helpCommand,
-    'color': color,
-    'idea': idea,
-    'project': project,
-    'drone': drone,
-    'font': font,
-};
 
 // listen for !commands
 client.on('message', (channel, tags, message, self) => {
@@ -129,6 +117,9 @@ client.on('message', (channel, tags, message, self) => {
 
 });
 
+
+/***************************** command functions *****************************/
+
 function helpCommand(ctx) {
     // list commands to the channel
     const commands = Object.keys(commandDefinitions);
@@ -157,6 +148,7 @@ function color(ctx) {
     const colorRequested = ctx.args[0].toLowerCase();
     const rgbRegex = /^rgb\(\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*,\s*(\d|[1-9]\d|1\d{2}|2[0-5]{2})\s*\)$/
     
+    // look at this beefy boi right here:
     if (colorRequested.match(/^#[0-9a-f]{6}$/i) || colorRequested.match(/^#[0-9a-f]{3}$/i)) {
         // it's a hex value
         let colorRGB = helpers.hexToRGB(colorRequested);
@@ -187,7 +179,6 @@ function color(ctx) {
     }
 }
 
-
 function idea(ctx) {
     const helperText = `@${ctx.author}, do you have an idea? Well use !idea followed by your idea to save for later!`
     if (ctx.args.length === 0) { client.say(ctx.channel, helperText); return; }
@@ -207,7 +198,6 @@ function idea(ctx) {
     client.say(ctx.channel, `Thanks, @${ctx.author}. I added your idea to The List.`);
 }
 
-
 function project(ctx) {
     if (!checkPerms(ctx)) { return; }
 
@@ -218,7 +208,6 @@ function project(ctx) {
     overlay.updateProject(proj);
     client.say(ctx.channel, `@${ctx.author}, sent the project to the overlay!`);
 }
-
 
 function drone(ctx) {
     // if arg length is 0, send help message
@@ -236,6 +225,7 @@ function drone(ctx) {
     }
 }
 
+// DANGER ZONE
 function checkPerms(ctx) {
     if (ctx.tags.mod || ctx.tags['room-id'] === ctx.tags['user-id']) {
         return true;
@@ -247,6 +237,7 @@ function checkPerms(ctx) {
     }
 }
 
+// DANGER IS MY MIDDLE NAME
 function font(ctx) {
     client.say(ctx.channel, `@${ctx.author}, Bun's using JetbrainsMono (Nerd Font) w/Ligatures`);
 }
