@@ -11,3 +11,5 @@ public/*.js.map
 **/bundle.js
 **/bundle.js.map
 **/public/index.html
+
+server/lib/
